@@ -1,5 +1,3 @@
-'use strict';
-
 import Koa from 'koa';
 
 import middleware from './middleware';
@@ -12,6 +10,8 @@ app.keys = ['my-secret-key'];
 app.use(middleware());
 app.use(auth());
 app.use(api());
-app.use(ctx => ctx.status = 404);
+app.use(ctx => {
+    ctx.status = 404;
+});
 
 export default app;

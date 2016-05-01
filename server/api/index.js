@@ -1,5 +1,3 @@
-'use strict';
-
 import compose from 'koa-compose';
 import Router from 'koa-router';
 import importDir from 'import-dir';

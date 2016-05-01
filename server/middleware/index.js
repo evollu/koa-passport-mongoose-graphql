@@ -1,4 +1,4 @@
-'use strict';
+
 
 import compose from 'koa-compose';
 import convert from 'koa-convert';
