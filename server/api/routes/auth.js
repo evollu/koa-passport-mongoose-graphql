@@ -34,6 +34,7 @@ async function register(ctx, next) {
             user = new User({
                 name,
                 email,
+                password
             });
 
             // TODO handle password

@@ -4,12 +4,11 @@ import {
 } from './server/db';
 import {
     development,
-    test,
-    production
+    production,
 } from './server/db/config';
 
 const port = process.env.PORT || 4000;
-const databaseConfing = (process.env.NODE_ENV == 'production') ? production : development;
+const databaseConfing = (process.env.NODE_ENV === 'production') ? production : development;
 
 (async() => {
     try {

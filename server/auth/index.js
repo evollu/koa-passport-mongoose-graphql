@@ -1,12 +1,10 @@
 import passport from 'koa-passport';
 import compose from 'koa-compose';
-import importDir from 'import-dir';
 import User from '../models/User';
 import jwt from 'jsonwebtoken';
 import {
     auth as config
 } from './config';
-import * as provider from './provider';
 
 // Strategies
 import jwtStrategy from './strategies/jwt';
