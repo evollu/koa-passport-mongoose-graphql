@@ -1,4 +1,4 @@
-import mongoose from 'mongoose-fill';
+import mongoose from 'mongoose';
 
 const ContactSchema = new mongoose.Schema({
   name: {

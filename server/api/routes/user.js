@@ -34,15 +34,24 @@ export default (router) => {
             }
 
         })
-        .delete('/user/contacts', isAuthenticated(), async ctx => {
+        .put('/user/contacts/:id', isAuthenticated(), async ctx => {
             const user = await User.findById(ctx.passport.user);
             if (!user) {
                 ctx.status = 400;
                 return;
             }
-            user.contacts.pull({
-                _id: ctx._id
-            });
+            let {
+                name,
+                email
+            } = ctx.request.body;
+        })
+        .delete('/user/contacts/:id', isAuthenticated(), async ctx => {
+            const user = await User.findById(ctx.passport.user);
+            if (!user) {
+                ctx.status = 400;
+                return;
+            }
+            user.contacts.pull(ctx.params.id);
             try {
                 await user.save();
                 ctx.status = 200;
