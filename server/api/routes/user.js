@@ -1,7 +1,27 @@
 import User from '../../models/User';
+import asyncBusboy from 'async-busboy';
+import uuid from 'node-uuid';
+import path from 'path';
+import fs from 'fs';
 import {
 	isAuthenticated
 } from '../../auth';
+
+const PROFILE_FOLDER_PREFIX = 'upload/';
+
+const writeStream = async(file, filename) => {
+	return new Promise((resolve, reject) => {
+		let stream = fs.createWriteStream(filename);
+		stream.on('finish', (e) => {
+			resolve();
+		});
+		stream.on('error', (e) => {
+			reject(e);
+		});
+		file.pipe(stream);
+	});
+
+};
 
 export default (router) => {
 	router
@@ -25,50 +45,64 @@ export default (router) => {
 				name,
 				email
 			});
-			try {
-				await user.save();
-				ctx.status = 200;
-			} catch (e) {
-				ctx.status = 400;
-				ctx.body = e;
-			}
-
+			await user.save();
+            ctx.status = 201;
 		})
 		.put('/user/contacts/:id', isAuthenticated(), async ctx => {
 			const user = await User.findById(ctx.passport.user);
-			if (!user) {
-				ctx.status = 400;
-				return;
-			}
 			let {
 				name,
 				email
 			} = ctx.request.body;
-            let contact = user.contacts.id(ctx.params.id);
-            contact.name = name;
-            contact.email = email;
-			try {
-				await user.save();
-				ctx.status = 200;
-			} catch (e) {
-				ctx.status = 400;
-				ctx.body = e;
-			}
+			let contact = user.contacts.id(ctx.params.id);
+			contact.name = name;
+			contact.email = email;
+			await user.save();
+			ctx.status = 200;
 
 		})
 		.delete('/user/contacts/:id', isAuthenticated(), async ctx => {
 			const user = await User.findById(ctx.passport.user);
-			if (!user) {
-				ctx.status = 400;
+			user.contacts.pull(ctx.params.id);
+			await user.save();
+			ctx.status = 200;
+		})
+		.get('/user/profile', isAuthenticated(), async ctx => {
+			const user = await User.findById(ctx.passport.user);
+			if (!user.profile) {
+				ctx.status = 404;
 				return;
 			}
-			user.contacts.pull(ctx.params.id);
-			try {
-				await user.save();
-				ctx.status = 200;
-			} catch (e) {
-				ctx.status = 400;
-				ctx.body = e;
+			let filepath = PROFILE_FOLDER_PREFIX + user.profile;
+			let fstat = await fs.statAsync(filepath);
+			if (fstat.isFile()) {
+				ctx.body = fs.createReadStream(filepath);
+                ctx.type = path.extname(filepath);
+			} else {
+				ctx.status = 404;
 			}
+
+		})
+		.post('/user/profile', isAuthenticated(), async ctx => {
+			const user = await User.findById(ctx.passport.user);
+			let {
+				files
+			} = await asyncBusboy(ctx.req);
+
+			if (!files.length) {
+				ctx.status = 400;
+				ctx.body = 'invalid file type';
+				return;
+			}
+
+			let file = files[0];
+			let filename = uuid.v4() + path.extname(file.filename);
+			await writeStream(file, PROFILE_FOLDER_PREFIX + filename);
+			user.profile = filename;
+			await user.save();
+			ctx.body = {
+				file: filename
+			};
+
 		});
 };
