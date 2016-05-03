@@ -2,6 +2,7 @@ import User from '../../models/User';
 import asyncBusboy from 'async-busboy';
 import uuid from 'node-uuid';
 import path from 'path';
+import validate from 'validate.js';
 import fs from 'fs';
 import {
 	isAuthenticated
@@ -23,6 +24,17 @@ const writeStream = async(file, filename) => {
 
 };
 
+const contactConstaints = {
+	name: { length: { maximum: 30 }, presence: true },
+	email: { email: true, presence: true },
+	phone: {
+		format: {
+			pattern: /^\d{9}$/,
+			flags: 'i'
+		}
+	}
+};
+
 export default (router) => {
 	router
 		.get('/user/me', isAuthenticated(), async ctx => {
@@ -32,6 +44,12 @@ export default (router) => {
 			}
 		})
 		.post('/user/contacts', isAuthenticated(), async ctx => {
+			let invalid = validate(ctx.request.body, contactConstaints);
+			if (invalid) {
+				ctx.body = invalid;
+				ctx.status = 400;
+				return;
+			}
 			let {
 				name,
 				email
@@ -46,9 +64,16 @@ export default (router) => {
 				email
 			});
 			await user.save();
-            ctx.status = 201;
+			ctx.status = 201;
 		})
 		.put('/user/contacts/:id', isAuthenticated(), async ctx => {
+			let invalid = validate(ctx.request.body, contactConstaints);
+			if (invalid) {
+				ctx.body = invalid;
+				ctx.status = 400;
+				return;
+			}
+
 			const user = await User.findById(ctx.passport.user);
 			let {
 				name,
@@ -77,7 +102,7 @@ export default (router) => {
 			let fstat = await fs.statAsync(filepath);
 			if (fstat.isFile()) {
 				ctx.body = fs.createReadStream(filepath);
-                ctx.type = path.extname(filepath);
+				ctx.type = path.extname(filepath);
 			} else {
 				ctx.status = 404;
 			}
