@@ -10,7 +10,7 @@ import {
 
 const PROFILE_FOLDER_PREFIX = 'upload/';
 
-const writeStream = async(file, filename) => {
+const writeStream = function *(file, filename) {
 	return new Promise((resolve, reject) => {
 		let stream = fs.createWriteStream(filename);
 		stream.on('finish', (e) => {
@@ -37,95 +37,95 @@ const contactConstaints = {
 
 export default (router) => {
 	router
-		.get('/user/me', isAuthenticated(), async ctx => {
-			const user = await User.findById(ctx.passport.user);
+		.get('/user/me', isAuthenticated(), function *(){
+			const user = yield User.findById(this.passport.user);
 			if (user) {
-				ctx.body = user;
+				this.body = user;
 			}
 		})
-		.post('/user/contacts', isAuthenticated(), async ctx => {
-			let invalid = validate(ctx.request.body, contactConstaints);
+		.post('/user/contacts', isAuthenticated(), function *(){
+			let invalid = validate(this.request.body, contactConstaints);
 			if (invalid) {
-				ctx.body = invalid;
-				ctx.status = 400;
+				this.body = invalid;
+				this.status = 400;
 				return;
 			}
 			let {
 				name,
 				email
-			} = ctx.request.body;
-			const user = await User.findById(ctx.passport.user);
+			} = this.request.body;
+			const user = yield User.findById(this.passport.user);
 			if (!user) {
-				ctx.status = 400;
+				this.status = 400;
 				return;
 			}
 			user.contacts.push({
 				name,
 				email
 			});
-			await user.save();
-			ctx.status = 201;
+			yield user.save();
+			this.status = 201;
 		})
-		.put('/user/contacts/:id', isAuthenticated(), async ctx => {
-			let invalid = validate(ctx.request.body, contactConstaints);
+		.put('/user/contacts/:id', isAuthenticated(), function *(){
+			let invalid = validate(this.request.body, contactConstaints);
 			if (invalid) {
-				ctx.body = invalid;
-				ctx.status = 400;
+				this.body = invalid;
+				this.status = 400;
 				return;
 			}
 
-			const user = await User.findById(ctx.passport.user);
+			const user = yield User.findById(this.passport.user);
 			let {
 				name,
 				email
-			} = ctx.request.body;
-			let contact = user.contacts.id(ctx.params.id);
+			} = this.request.body;
+			let contact = user.contacts.id(this.params.id);
 			contact.name = name;
 			contact.email = email;
-			await user.save();
-			ctx.status = 200;
+			yield user.save();
+			this.status = 200;
 
 		})
-		.delete('/user/contacts/:id', isAuthenticated(), async ctx => {
-			const user = await User.findById(ctx.passport.user);
-			user.contacts.pull(ctx.params.id);
-			await user.save();
-			ctx.status = 200;
+		.delete('/user/contacts/:id', isAuthenticated(), function *(){
+			const user = yield User.findById(this.passport.user);
+			user.contacts.pull(this.params.id);
+			yield user.save();
+			this.status = 200;
 		})
-		.get('/user/profile', isAuthenticated(), async ctx => {
-			const user = await User.findById(ctx.passport.user);
+		.get('/user/profile', isAuthenticated(), function *(){
+			const user = yield User.findById(this.passport.user);
 			if (!user.profile) {
-				ctx.status = 404;
+				this.status = 404;
 				return;
 			}
 			let filepath = PROFILE_FOLDER_PREFIX + user.profile;
-			let fstat = await fs.statAsync(filepath);
+			let fstat = yield fs.statAsync(filepath);
 			if (fstat.isFile()) {
-				ctx.body = fs.createReadStream(filepath);
-				ctx.type = path.extname(filepath);
+				this.body = fs.createReadStream(filepath);
+				this.type = path.extname(filepath);
 			} else {
-				ctx.status = 404;
+				this.status = 404;
 			}
 
 		})
-		.post('/user/profile', isAuthenticated(), async ctx => {
-			const user = await User.findById(ctx.passport.user);
+		.post('/user/profile', isAuthenticated(), function *(){
+			const user = yield User.findById(this.passport.user);
 			let {
 				files
-			} = await asyncBusboy(ctx.req);
+			} = yield asyncBusboy(this.req);
 
 			if (!files.length) {
-				ctx.status = 400;
-				ctx.body = 'invalid file type';
+				this.status = 400;
+				this.body = 'invalid file type';
 				return;
 			}
 
 			let file = files[0];
 			let filename = uuid.v4() + path.extname(file.filename);
-			await writeStream(file, PROFILE_FOLDER_PREFIX + filename);
+			yield writeStream(file, PROFILE_FOLDER_PREFIX + filename);
 			user.profile = filename;
-			await user.save();
-			ctx.body = {
+			yield user.save();
+			this.body = {
 				file: filename
 			};
 

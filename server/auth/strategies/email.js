@@ -3,13 +3,13 @@ import {
     Strategy as CustomStrategy
 } from 'passport-custom';
 
-export default new CustomStrategy(async(ctx, done) => {
+export default new CustomStrategy(function *(ctx, done) {
     console.log('Email Strategy: ', ctx.body);
 
     try {
         // Test whether is a login using email and password
         if (ctx.body.email && ctx.body.password) {
-            const user = await User.findOne({
+            const user = yield User.findOne({
                 email: ctx.body.email.toLowerCase()
             });
 

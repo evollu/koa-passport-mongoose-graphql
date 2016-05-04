@@ -7,19 +7,19 @@ import api from './api';
 const app = new Koa();
 app.keys = ['my-secret-key'];
 
-app.use(async(ctx, next) => {
+app.use(function *(next) {
 	try {
-		await next();
+		yield next;
 	} catch (err) {
-		ctx.status = 500;
-		ctx.body = err.message;
+		this.status = 500;
+		this.body = err.message;
 	}
 });
 app.use(middleware());
 app.use(auth());
 app.use(api());
-app.use(ctx => {
-	ctx.status = 404;
+app.use(function *() {
+	this.status = 404;
 });
 
 export default app;

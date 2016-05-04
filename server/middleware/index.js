@@ -1,17 +1,17 @@
 import compose from 'koa-compose';
-import convert from 'koa-convert';
 import logger from 'koa-logger';
 import cors from 'koa-cors';
 import bodyParser from 'koa-bodyparser';
+import etag from 'koa-etag';
+//import cache  from '../cache/middleware';
 
 //import session from 'koa-generic-session';
 
 export default function middleware() {
 	return compose([
 		logger(),
-		convert(cors()),
-		convert(bodyParser()),
-		//serve(path.join(__dirname, '/public'))
-		//    convert(session()),
+		cors(),
+		bodyParser(),
+		etag()
 	]);
 }

@@ -3,7 +3,7 @@ import compose from 'koa-compose';
 import User from '../models/User';
 import jwt from 'jsonwebtoken';
 import {
-    auth as config
+	auth as config
 } from './config';
 
 // Strategies
@@ -14,70 +14,70 @@ passport.use('jwt', jwtStrategy);
 passport.use('email', emailStrategy);
 
 passport.serializeUser((user, done) => {
-    done(null, user._id);
+	done(null, user._id);
 });
 
 passport.deserializeUser((id, done) => {
-    (async() => {
-        try {
-            const user = await User.findById(id);
-            done(null, user);
-        } catch (error) {
-            done(error);
-        }
-    })();
+	(function*() {
+		try {
+			const user = yield User.findById(id);
+			done(null, user);
+		} catch (error) {
+			done(error);
+		}
+	})();
 });
 
 export default function auth() {
-    return compose([
-        passport.initialize(),
-    ]);
+	return compose([
+		passport.initialize(),
+	]);
 }
 
 export function isAuthenticated() {
-    return passport.authenticate('jwt');
+	return passport.authenticate('jwt');
 }
 
 export function authEmail() {
-    return passport.authenticate('email');
+	return passport.authenticate('email');
 }
 
 // After autentication using one of the strategies, generate a JWT token
 export function generateToken() {
-    return async ctx => {
-        const {
-            user
-        } = ctx.passport;
-        if (user === false) {
-            ctx.status = 401;
-        } else {
-            const _token = jwt.sign({
-                id: user
-            }, config.secret);
-            const token = `JWT ${_token}`;
+	return function*() {
+		const {
+			user
+		} = this.passport;
+		if (user === false) {
+			this.status = 401;
+		} else {
+			const _token = jwt.sign({
+				id: user
+			}, config.secret);
+			const token = `JWT ${_token}`;
 
-            const currentUser = await User.findOne({
-                _id: user
-            });
+			const currentUser = yield User.findOne({
+				_id: user
+			});
 
-            ctx.status = 200;
-            ctx.body = {
-                token,
-                user: currentUser,
-            };
-        }
-    };
+			this.status = 200;
+			this.body = {
+				token,
+				user: currentUser,
+			};
+		}
+	};
 }
 
 // Web Facebook Authentication
 export function isFacebookAuthenticated() {
-    return passport.authenticate('facebook', {
-        scope: ['email'],
-    });
+	return passport.authenticate('facebook', {
+		scope: ['email'],
+	});
 }
 
 export function isFacebookAuthenticatedCallback() {
-    return passport.authenticate('facebook', {
-        failureRedirect: '/login',
-    });
+	return passport.authenticate('facebook', {
+		failureRedirect: '/login',
+	});
 }

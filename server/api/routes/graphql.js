@@ -12,24 +12,24 @@ function accepts(ctx, type) {
 export default (router) => {
   router
     .get('/graphql',
-      async ctx => {
-        const body = ctx.request.body;
-        const { query, variables } = Object.assign({}, body, ctx.query);
+      function *() {
+        const body = this.request.body;
+        const { query, variables } = Object.assign({}, body, this.query);
 
-        if (accepts(ctx, 'html') && graphiql) {
-          ctx.body = renderGraphiQL({ query, variables });
+        if (accepts(this, 'html') && graphiql) {
+          this.body = renderGraphiQL({ query, variables });
         } else if (query && query.includes('mutation')) {
-          ctx.status = 406;
-          ctx.body = 'GraphQL mutation only allowed in POST request.';
+          this.status = 406;
+          this.body = 'GraphQL mutation only allowed in POST request.';
         }
       }
     )
     .post('/graphql',
-      async ctx => {
-        const body = ctx.request.body;
-        const { query, variables } = Object.assign({}, body, ctx.query);
+      function *() {
+        const body = this.request.body;
+        const { query, variables } = Object.assign({}, body, this.query);
 
-        ctx.body = await graphql(schema, query, ctx, variables);
+        this.body = yield graphql(schema, query, this, variables);
       }
     );
 };

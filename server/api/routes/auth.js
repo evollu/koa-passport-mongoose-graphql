@@ -17,16 +17,16 @@ export default (router) => {
         );
 };
 
-async function register(ctx, next) {
+function *register(next) {
     const {
         name,
         email,
         password,
-    } = ctx.request.body;
+    } = this.request.body;
 
     // TODO - improve validation
     if (name && email && password) {
-        let user = await User.findOne({
+        let user = yield User.findOne({
             email,
         });
 
@@ -39,24 +39,24 @@ async function register(ctx, next) {
 
             // TODO handle password
 
-            await user.save();
+            yield user.save();
 
-            ctx.passport = {
+            this.passport = {
                 user: user._id,
             };
 
-            await next();
+            yield next();
 
         } else {
-            ctx.status = 400;
-            ctx.body = {
+            this.status = 400;
+            this.body = {
                 status: 'error',
                 message: 'E-mail already registered'
             };
         }
     } else {
-        ctx.status = 400;
-        ctx.body = {
+        this.status = 400;
+        this.body = {
             status: 'error',
             message: 'Invalid email or password'
         };
