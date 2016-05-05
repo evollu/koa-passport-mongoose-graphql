@@ -1,9 +1,10 @@
 import User from '../../models/User';
+import co from 'co';
 import {
     Strategy as CustomStrategy
 } from 'passport-custom';
 
-export default new CustomStrategy(function *(ctx, done) {
+export default new CustomStrategy(co.wrap(function *(ctx, done) {
     console.log('Email Strategy: ', ctx.body);
 
     try {
@@ -25,4 +26,4 @@ export default new CustomStrategy(function *(ctx, done) {
     } catch (error) {
         done(error);
     }
-});
+}));

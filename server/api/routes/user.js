@@ -10,7 +10,7 @@ import {
 
 const PROFILE_FOLDER_PREFIX = 'upload/';
 
-const writeStream = function *(file, filename) {
+const writeStream = function*(file, filename) {
 	return new Promise((resolve, reject) => {
 		let stream = fs.createWriteStream(filename);
 		stream.on('finish', (e) => {
@@ -37,13 +37,13 @@ const contactConstaints = {
 
 export default (router) => {
 	router
-		.get('/user/me', isAuthenticated(), function *(){
+		.get('/user/me', isAuthenticated(), function*() {
 			const user = yield User.findById(this.passport.user);
 			if (user) {
 				this.body = user;
 			}
 		})
-		.post('/user/contacts', isAuthenticated(), function *(){
+		.post('/user/contacts', isAuthenticated(), function*() {
 			let invalid = validate(this.request.body, contactConstaints);
 			if (invalid) {
 				this.body = invalid;
@@ -66,7 +66,7 @@ export default (router) => {
 			yield user.save();
 			this.status = 201;
 		})
-		.put('/user/contacts/:id', isAuthenticated(), function *(){
+		.put('/user/contacts/:id', isAuthenticated(), function*() {
 			let invalid = validate(this.request.body, contactConstaints);
 			if (invalid) {
 				this.body = invalid;
@@ -86,13 +86,13 @@ export default (router) => {
 			this.status = 200;
 
 		})
-		.delete('/user/contacts/:id', isAuthenticated(), function *(){
+		.delete('/user/contacts/:id', isAuthenticated(), function*() {
 			const user = yield User.findById(this.passport.user);
 			user.contacts.pull(this.params.id);
 			yield user.save();
 			this.status = 200;
 		})
-		.get('/user/profile', isAuthenticated(), function *(){
+		.get('/user/profile', isAuthenticated(), function*() {
 			const user = yield User.findById(this.passport.user);
 			if (!user.profile) {
 				this.status = 404;
@@ -108,7 +108,7 @@ export default (router) => {
 			}
 
 		})
-		.post('/user/profile', isAuthenticated(), function *(){
+		.post('/user/profile', isAuthenticated(), function*() {
 			const user = yield User.findById(this.passport.user);
 			let {
 				files

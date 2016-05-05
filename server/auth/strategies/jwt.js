@@ -1,22 +1,23 @@
 import User from '../../models/User';
+import co from 'co';
 import {
-    Strategy as JWTStrategy,
-    ExtractJwt
+	Strategy as JWTStrategy,
+	ExtractJwt
 } from 'passport-jwt';
 import {
-    auth
+	auth
 } from '../config';
 
 const opts = {
-    jwtFromRequest: ExtractJwt.fromAuthHeader(),
-    secretOrKey: auth.secret,
+	jwtFromRequest: ExtractJwt.fromAuthHeader(),
+	secretOrKey: auth.secret,
 };
 
-export default new JWTStrategy(opts, function *(jwt_payload, done) {
-    const user = yield User.findById(jwt_payload.id);
-    if (user) {
-        done(null, user);
-    } else {
-        done(null, false);
-    }
-});
+export default new JWTStrategy(opts, co.wrap(function*(jwt_payload, done) {
+	const user = yield User.findById(jwt_payload.id);
+	if (user) {
+		done(null, user);
+	} else {
+		done(null, false);
+	}
+}));

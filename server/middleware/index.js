@@ -3,7 +3,6 @@ import logger from 'koa-logger';
 import cors from 'koa-cors';
 import bodyParser from 'koa-bodyparser';
 import etag from 'koa-etag';
-//import cache  from '../cache/middleware';
 
 //import session from 'koa-generic-session';
 
