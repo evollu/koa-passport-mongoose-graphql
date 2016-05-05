@@ -39,21 +39,18 @@ const contactConstaints = {
 export default (router) => {
 	router
 		.get('/user/me', isAuthenticated(), function*(next) {
-			let key = this.passport.user + ':' + this.request.url;
+			let key = this.passport.user._id + ':' + this.request.url;
 			if (yield redis.has(key)) {
-				console.log('get from cache');
+				console.log('serve cache ' + key);
 				this.body = yield redis.get(key);
 			} else {
 				console.log('no cache found');
 				yield next;
-				console.log('write cache');
-				redis.set(key, this.body, 5);
+				console.log('write cache ' + key);
+				redis.set(key, this.body, 10);
 			}
 		}, function*() {
-			const user = yield User.findById(this.passport.user);
-			if (user) {
-				this.body = user;
-			}
+			this.body = this.passport.user;
 		})
 		.post('/user/contacts', isAuthenticated(), function*() {
 			let invalid = validate(this.request.body, contactConstaints);
@@ -66,16 +63,15 @@ export default (router) => {
 				name,
 				email
 			} = this.request.body;
-			const user = yield User.findById(this.passport.user);
-			if (!user) {
+			if (!this.passport.user) {
 				this.status = 400;
 				return;
 			}
-			user.contacts.push({
+			this.passport.user.contacts.push({
 				name,
 				email
 			});
-			yield user.save();
+			yield this.passport.user.save();
 			this.status = 201;
 		})
 		.put('/user/contacts/:id', isAuthenticated(), function*() {
@@ -86,31 +82,28 @@ export default (router) => {
 				return;
 			}
 
-			const user = yield User.findById(this.passport.user);
 			let {
 				name,
 				email
 			} = this.request.body;
-			let contact = user.contacts.id(this.params.id);
+			let contact = this.passport.user.contacts.id(this.params.id);
 			contact.name = name;
 			contact.email = email;
-			yield user.save();
+			yield this.passport.user.save();
 			this.status = 200;
 
 		})
 		.delete('/user/contacts/:id', isAuthenticated(), function*() {
-			const user = yield User.findById(this.passport.user);
-			user.contacts.pull(this.params.id);
-			yield user.save();
+			this.passport.user.contacts.pull(this.params.id);
+			yield this.passport.user.save();
 			this.status = 200;
 		})
 		.get('/user/profile', isAuthenticated(), function*() {
-			const user = yield User.findById(this.passport.user);
-			if (!user.profile) {
+			if (!this.passport.user.profile) {
 				this.status = 404;
 				return;
 			}
-			let filepath = PROFILE_FOLDER_PREFIX + user.profile;
+			let filepath = PROFILE_FOLDER_PREFIX + this.passport.user.profile;
 			let fstat = yield fs.statAsync(filepath);
 			if (fstat.isFile()) {
 				this.body = fs.createReadStream(filepath);
@@ -121,7 +114,6 @@ export default (router) => {
 
 		})
 		.post('/user/profile', isAuthenticated(), function*() {
-			const user = yield User.findById(this.passport.user);
 			let {
 				files
 			} = yield asyncBusboy(this.req);
@@ -135,8 +127,8 @@ export default (router) => {
 			let file = files[0];
 			let filename = uuid.v4() + path.extname(file.filename);
 			yield writeStream(file, PROFILE_FOLDER_PREFIX + filename);
-			user.profile = filename;
-			yield user.save();
+			this.passport.user.profile = filename;
+			yield this.passport.user.save();
 			this.body = {
 				file: filename
 			};
