@@ -7,6 +7,7 @@ import fs from 'fs';
 import {
 	isAuthenticated
 } from '../../auth';
+import redis from '../../db/redis';
 
 const PROFILE_FOLDER_PREFIX = 'upload/';
 
@@ -37,7 +38,18 @@ const contactConstaints = {
 
 export default (router) => {
 	router
-		.get('/user/me', isAuthenticated(), function*() {
+		.get('/user/me', isAuthenticated(), function*(next) {
+			let key = this.passport.user + ':' + this.request.url;
+			if (yield redis.has(key)) {
+				console.log('get from cache');
+				this.body = yield redis.get(key);
+			} else {
+				console.log('no cache found');
+				yield next;
+				console.log('write cache');
+				redis.set(key, this.body, 5);
+			}
+		}, function*() {
 			const user = yield User.findById(this.passport.user);
 			if (user) {
 				this.body = user;

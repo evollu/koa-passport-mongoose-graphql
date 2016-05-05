@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import redis from './redis';
 
 import {
 	development,
@@ -7,7 +8,7 @@ import {
 
 const databaseConfing = (process.env.NODE_ENV === 'production') ? production : development;
 
-export default function connectDatabase() {
+export function connectDatabase() {
 	return new Promise((resolve, reject) => {
 		mongoose.connection
 			.on('error', error => reject(error))
@@ -16,4 +17,8 @@ export default function connectDatabase() {
 
 		mongoose.connect(databaseConfing);
 	});
+}
+
+export function connectRedis() {
+	return redis.connect({});
 }
