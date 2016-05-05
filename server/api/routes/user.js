@@ -55,17 +55,14 @@ export default (router) => {
 		.post('/user/contacts', isAuthenticated(), function*() {
 			let invalid = validate(this.request.body, contactConstaints);
 			if (invalid) {
-				this.body = invalid;
-				this.status = 400;
-				return;
+				this.throw(400, JSON.stringify(invalid));
 			}
 			let {
 				name,
 				email
 			} = this.request.body;
 			if (!this.passport.user) {
-				this.status = 400;
-				return;
+				this.throw(400);
 			}
 			this.passport.user.contacts.push({
 				name,
@@ -77,9 +74,7 @@ export default (router) => {
 		.put('/user/contacts/:id', isAuthenticated(), function*() {
 			let invalid = validate(this.request.body, contactConstaints);
 			if (invalid) {
-				this.body = invalid;
-				this.status = 400;
-				return;
+				this.throw(400, JSON.stringify(invalid));
 			}
 
 			let {
@@ -100,8 +95,7 @@ export default (router) => {
 		})
 		.get('/user/profile', isAuthenticated(), function*() {
 			if (!this.passport.user.profile) {
-				this.status = 404;
-				return;
+				this.throw(400);
 			}
 			let filepath = PROFILE_FOLDER_PREFIX + this.passport.user.profile;
 			let fstat = yield fs.statAsync(filepath);
@@ -109,7 +103,7 @@ export default (router) => {
 				this.body = fs.createReadStream(filepath);
 				this.type = path.extname(filepath);
 			} else {
-				this.status = 404;
+				this.throw(404);
 			}
 
 		})
@@ -119,9 +113,7 @@ export default (router) => {
 			} = yield asyncBusboy(this.req);
 
 			if (!files.length) {
-				this.status = 400;
-				this.body = 'invalid file type';
-				return;
+				this.throw(400, 'Invalid file type');
 			}
 
 			let file = files[0];
