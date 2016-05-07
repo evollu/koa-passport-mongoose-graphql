@@ -1,4 +1,3 @@
-import User from '../../models/User';
 import asyncBusboy from 'async-busboy';
 import uuid from 'node-uuid';
 import path from 'path';

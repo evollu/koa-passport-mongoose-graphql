@@ -45,7 +45,7 @@ function* register(next) {
 				user: user._id,
 			};
 
-			yield next();
+			yield next;
 
 		} else {
 			this.status = 400;
