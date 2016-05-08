@@ -2,9 +2,10 @@ import mongoose from 'mongoose';
 
 const ChatSchema = new mongoose.Schema({
     users: [{
-        name: {
-            type: String,
-            required: true
+        id: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            index: true
         },
         lastView: {
             type: Date

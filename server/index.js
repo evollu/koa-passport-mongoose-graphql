@@ -12,21 +12,27 @@ app.keys = ['my-secret-key'];
 
 import graffiti from '@risingstack/graffiti';
 import { getSchema } from '@risingstack/graffiti-mongoose';
-import Models from './models';
+import Models, {validateHook} from './models';
+
+const preMutation = (next, args, context, info) => {
+	let invalid = validateHook(info.fieldName, args);
+	if (invalid) {
+		throw invalid;
+	}
+	next();
+};
 
 const schema = getSchema(Models, {
 	hooks: {
 		mutation: {
-			pre: (next, args, context) => {
-				console.log(context);
-				next();
-			}
+			pre: preMutation
 		}
 	}
 });
+
 const graphiql = true;
 
-app.use(function *(next) {
+app.use(function*(next) {
 	try {
 		yield next;
 	} catch (err) {
@@ -44,7 +50,7 @@ app.use(graffiti.koa({
 }));
 app.use(etag());
 app.use(api());
-app.use(function *() {
+app.use(function*() {
 	this.status = 404;
 });
 

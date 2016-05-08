@@ -91,4 +91,16 @@ const UserSchema = new mongoose.Schema({
 	},
 });
 
+export const UserConstraints = {
+	name: { length: { maximum: 30 }},
+	email: { email: true},
+    passowrd: { length: { maximum: 30 }},
+	phone: {
+		format: {
+			pattern: /^\d{9}$/,
+			flags: 'i'
+		}
+	}
+};
+
 export default mongoose.model('User', UserSchema);
