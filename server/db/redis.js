@@ -5,12 +5,7 @@ class redis{
 	connect(options) {
 		return new Promise((resolve, reject) => {
 			this.options = options;
-			this.connection = new Redis({
-				port: this.options.port || 6379,
-				host: this.options.host || '127.0.0.1',
-				password: this.options.password || null,
-				autoResendUnfulfilledCommands: false,
-			});
+			this.connection = new Redis();
 
 			this.connection.on('error', (error) => {
 				reject(error);

@@ -1,12 +1,7 @@
 import mongoose from 'mongoose';
 import redis from './redis';
 
-import {
-	development,
-	production,
-} from './config';
-
-const databaseConfing = (process.env.NODE_ENV === 'production') ? production : development;
+const databaseConfing = process.env.MONGODB_URI || 'mongodb://localhost/mydb';
 
 export function connectDatabase() {
 	return new Promise((resolve, reject) => {
@@ -20,5 +15,5 @@ export function connectDatabase() {
 }
 
 export function connectRedis() {
-	return redis.connect({});
+	return redis.connect(process.env.REDIS_URL || 'localhost:6379');
 }
