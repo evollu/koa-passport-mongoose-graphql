@@ -51,7 +51,7 @@
     "eslint-plugin-jsx-a11y": "^1.0.4",
     "eslint-plugin-react": "latest",
     "mocha": "latest",
-    "nodemon": "latest",
+    "nodemon": "^1.9.2",
     "supertest": "latest",
     "supertest-as-promised": "latest"
   },
