@@ -7,6 +7,10 @@ import {
 	isAuthenticated
 } from '../../auth';
 import redis from '../../db/redis';
+import fetch from 'node-fetch';
+
+const GCM_URL = 'https://gcm-http.googleapis.com/gcm/send';
+const GCM_AUTH = 'key=AIzaSyAq-ia0b-MicHcSr4v_4CwLjFLAGMGPO8Y';
 
 const PROFILE_FOLDER_PREFIX = 'upload/';
 
@@ -37,7 +41,16 @@ const contactConstaints = {
 
 export default (router) => {
 	router
-		.delete('/user', isAuthenticated(), function*(next){
+		.post('/user/gcm', isAuthenticated(), function*() {
+			if (!this.request.body.gcm) {
+				this.throw(400, 'empty gcm');
+			}
+			console.log(this.request.body.gcm);
+			this.passport.user.gcm = this.request.body.gcm;
+			yield this.passport.user.save();
+			this.status = 201;
+		})
+		.delete('/user', isAuthenticated(), function*(next) {
 			yield this.passport.user.remove();
 			this.body = 200;
 		})
@@ -79,20 +92,46 @@ export default (router) => {
 			this.status = 200;
 		})
 		.post('/user/team', isAuthenticated(), function*() {
-			let invalid = validate(this.request.body, contactConstaints);
-			if (invalid) {
-				this.throw(400, JSON.stringify(invalid));
-			}
 			let {
 				name,
-				email
+				email,
+				type,
+				photo,
+				phone
 			} = this.request.body;
 			this.passport.user.team.push({
 				name,
-				email
+				email,
+				type,
+				photo,
+				phone
 			});
-			yield this.passport.user.save();
-			this.status = 201;
+			try {
+				yield this.passport.user.save();
+				let result = yield fetch(GCM_URL, {
+					method: 'POST',
+					headers: {
+						Authorization: GCM_AUTH,
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						to: this.passport.user.gcm,
+						data: {
+							type: 'NEW_CONTACT',
+							data: this.passport.user.team[this.passport.user.team.length - 1]
+						}
+					})
+				});
+				if (!result.ok) {
+					console.log(yield result.text());
+				}
+				this.status = 201;
+
+			} catch (e) {
+				console.log(e);
+				this.throw(500, e);
+			}
+
 		})
 		.put('/user/team/:id', isAuthenticated(), function*() {
 			let invalid = validate(this.request.body, contactConstaints);

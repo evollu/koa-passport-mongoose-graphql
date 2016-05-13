@@ -23,6 +23,7 @@ function* register(next) {
 		lastName,
 		email,
 		password,
+		gcm
 	} = this.request.body;
 
 	// TODO - improve validation
@@ -36,7 +37,8 @@ function* register(next) {
 				firstName,
 				lastName,
 				email,
-				password
+				password,
+				gcm: gcm ? [gcm] : []
 			});
 
 			// TODO handle password

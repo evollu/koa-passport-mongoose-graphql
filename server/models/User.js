@@ -59,6 +59,9 @@ const TaskSchema = new mongoose.Schema({
 });
 
 const UserSchema = new mongoose.Schema({
+	gcm: {
+		type: String
+	},
 	firstName: {
 		type: String,
 		required: true,
@@ -96,12 +99,13 @@ const UserSchema = new mongoose.Schema({
 });
 
 export const UserConstraints = {
-	name: { length: { maximum: 30 }},
+	firstName: { length: { maximum: 30 }},
+	lastName: { length: { maximum: 30 }},
 	email: { email: true},
     passowrd: { length: { maximum: 30 }},
 	phone: {
 		format: {
-			pattern: /^\d{9}$/,
+			pattern: /^\d+$/,
 			flags: 'i'
 		}
 	}
