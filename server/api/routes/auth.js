@@ -84,7 +84,7 @@ function* register(next) {
 			try {
 				yield user.save();
 			} catch (e) {
-				this.throw(400);
+				this.throw(400, 'Failed to create user');
 			}
 
 			this.passport = {
@@ -94,17 +94,9 @@ function* register(next) {
 			yield next;
 
 		} else {
-			this.status = 400;
-			this.body = {
-				status: 'error',
-				message: 'E-mail already registered'
-			};
+			this.throw(400, 'E-mail already registered');
 		}
 	} else {
-		this.status = 400;
-		this.body = {
-			status: 'error',
-			message: 'Invalid email or password'
-		};
+		this.throw(400, 'Invalid email or password');
 	}
 }
