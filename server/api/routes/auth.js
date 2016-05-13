@@ -81,7 +81,11 @@ function* register(next) {
 				'canChat': false
 			}];
 
-			yield user.save();
+			try {
+				yield user.save();
+			} catch (e) {
+				this.throw(400);
+			}
 
 			this.passport = {
 				user: user._id,
