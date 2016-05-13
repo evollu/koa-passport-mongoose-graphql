@@ -37,6 +37,10 @@ const contactConstaints = {
 
 export default (router) => {
 	router
+		.delete('/user', isAuthenticated(), function*(next){
+			yield this.passport.user.remove();
+			this.body = 200;
+		})
 		.get('/user/me', isAuthenticated(), function*(next) {
 			let key = this.passport.user._id + ':' + this.request.url;
 			if (yield redis.has(key)) {
@@ -51,7 +55,30 @@ export default (router) => {
 		}, function*() {
 			this.body = this.passport.user;
 		})
-		.post('/user/contacts', isAuthenticated(), function*() {
+		.post('/user/measure', isAuthenticated(), function*() {
+			console.log(this.request.body);
+			this.passport.user.measures.push(this.request.body);
+			try {
+				let response = yield this.passport.user.save();
+				this.status = 200;
+				this.body = response.measures[response.measures.length - 1];
+			} catch (e) {
+				this.throw(400, e);
+			}
+		})
+		.delete('/user/measure/:id', isAuthenticated(), function*() {
+			this.passport.user.measures.pull(this.params.id);
+			try {
+				yield this.passport.user.save();
+				this.status = 200;
+			} catch (e) {
+				this.throw(400, e);
+			}
+		})
+		.post('/user/measure/data', isAuthenticated(), function*() {
+			this.status = 200;
+		})
+		.post('/user/team', isAuthenticated(), function*() {
 			let invalid = validate(this.request.body, contactConstaints);
 			if (invalid) {
 				this.throw(400, JSON.stringify(invalid));
@@ -60,17 +87,14 @@ export default (router) => {
 				name,
 				email
 			} = this.request.body;
-			if (!this.passport.user) {
-				this.throw(400);
-			}
-			this.passport.user.contacts.push({
+			this.passport.user.team.push({
 				name,
 				email
 			});
 			yield this.passport.user.save();
 			this.status = 201;
 		})
-		.put('/user/contacts/:id', isAuthenticated(), function*() {
+		.put('/user/team/:id', isAuthenticated(), function*() {
 			let invalid = validate(this.request.body, contactConstaints);
 			if (invalid) {
 				this.throw(400, JSON.stringify(invalid));
@@ -80,15 +104,15 @@ export default (router) => {
 				name,
 				email
 			} = this.request.body;
-			let contact = this.passport.user.contacts.id(this.params.id);
+			let contact = this.passport.user.team.id(this.params.id);
 			contact.name = name;
 			contact.email = email;
 			yield this.passport.user.save();
 			this.status = 200;
 
 		})
-		.delete('/user/contacts/:id', isAuthenticated(), function*() {
-			this.passport.user.contacts.pull(this.params.id);
+		.delete('/user/team/:id', isAuthenticated(), function*() {
+			this.passport.user.team.pull(this.params.id);
 			yield this.passport.user.save();
 			this.status = 200;
 		})

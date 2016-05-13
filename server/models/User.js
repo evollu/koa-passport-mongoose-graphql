@@ -1,18 +1,25 @@
 import mongoose from 'mongoose';
 
+const MEASURE_TYPES = ['weight', 'bloodSugar','bloodPressure', 'nebulizer', 'pedalEdema','behavioralSurvey','rescueInhaler'];
+
 const TeamSchema = new mongoose.Schema({
 	name: {
 		type: String,
 		required: true,
-		index: true
 	},
 	email: {
 		type: String,
 		required: true,
-		index: true
 	},
 	phone: {
 		type: String
+	},
+	type: {
+		type: String,
+		enum: ['CareManager', 'Spouse', 'Physician']
+	},
+	photo: {
+		type: String,
 	},
 	canChat: {
 		type: Boolean
@@ -23,31 +30,26 @@ const MeasureSchema = new mongoose.Schema({
 	type: {
 		type: String,
 		required: true,
-        index: true,
-		enum: ['weight', 'bloodSugar']
+		enum: MEASURE_TYPES
 	},
-	frequecy: {
+	frequency: {
 		type: String,
 		required: true,
-        index: true,
 		enum: ['daily', 'weekly', 'monthly']
 	},
 	time: {
 		type: Date,
 		required: true,
-        index: true
 	},
 	target: {
 		type: Number,
-        index: true,
-        required: true
 	}
 });
 
 const TaskSchema = new mongoose.Schema({
 	type: {
 		type: String,
-		enum: ['weight', 'bloodSugar'],
+		enum: MEASURE_TYPES,
 		required: true
 	},
 	time: {
@@ -57,20 +59,21 @@ const TaskSchema = new mongoose.Schema({
 });
 
 const UserSchema = new mongoose.Schema({
-	name: {
+	firstName: {
 		type: String,
 		required: true,
-		index: true,
+	},
+	lastName: {
+		type: String,
+		required: true,
 	},
 	email: {
 		type: String,
 		required: true,
-		index: true,
 	},
 	password: {
 		type: String,
 		required: true,
-		index: true
 	},
 	profile: String,
 	team: [TeamSchema],
