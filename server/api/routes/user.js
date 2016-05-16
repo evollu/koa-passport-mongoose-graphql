@@ -50,9 +50,48 @@ export default (router) => {
 			yield this.passport.user.save();
 			this.status = 201;
 		})
-		.delete('/user', isAuthenticated(), function*(next) {
-			yield this.passport.user.remove();
-			this.body = 200;
+		.post('/user/reset', isAuthenticated(), function*(next) {
+			//push dummy data
+			this.passport.user.measures = [{
+				'type': 'weight',
+				'frequency': 'daily',
+				'time': new Date(29701000),
+				'target': 170
+			}];
+			this.passport.user.notify = {
+				'task': 2,
+				'chat': 15
+			};
+			this.passport.user.tasks = [{
+				'type': 'weight',
+				'time': new Date(29701000)
+			}, {
+				'type': 'bloodSugar',
+				'time': new Date(54901000)
+			}];
+			this.passport.user.team = [{
+				'name': 'Gregory House',
+				'email': 'dummy@adf.com',
+				'type': 'Physician',
+				'photo': 'http://ia.media-imdb.com/images/M/MV5BMTM0Mjc2NzI5OF5BMl5BanBnXkFtZTYwMDk4NzE3._V1_SX640_SY720_.jpg',
+				'canChat': true
+			}, {
+				'name': 'Allison Cameron',
+				'email': 'dummy@adf.com',
+				'phone': '1234567890',
+				'type': 'CareManager',
+				'photo': 'http://vignette1.wikia.nocookie.net/house/images/5/5c/AllisonCameron.png/revision/latest?cb=20070812160453',
+				'canChat': true
+			}, {
+				'name': 'Remy Hadley',
+				'email': 'dummy@adf.com',
+				'phone': '1234567890',
+				'type': 'Spouse',
+				'photo': 'http://vignette3.wikia.nocookie.net/house/images/d/d7/House_Thirteen.jpg/revision/latest?cb=20110506132114',
+				'canChat': false
+			}];
+			yield this.passport.user.save();
+			this.body = this.passport.user;
 		})
 		.get('/user/me', isAuthenticated(), function*(next) {
 			let key = this.passport.user._id + ':' + this.request.url;
@@ -89,6 +128,13 @@ export default (router) => {
 			}
 		})
 		.post('/user/measure/data', isAuthenticated(), function*() {
+			this.status = 201;
+			this.body = {
+				_id: 'fakeid',
+				...this.request.body
+			};
+		})
+		.put('/user/measure/data/:id', isAuthenticated(), function*() {
 			this.status = 200;
 		})
 		.post('/user/team', isAuthenticated(), function*() {
