@@ -49,6 +49,15 @@ function* register(next) {
 				'frequency': 'daily',
 				'time': new Date(29701000),
 				'target': 170
+			}, {
+				'type': 'bloodSugar',
+				'frequency': 'weekly',
+				'time': new Date(29701000),
+				'target': 100
+			}, {
+				'type': 'behavioralSurvey',
+				'frequency': 'monthly',
+				'time': new Date(29701000),
 			}];
 			user.notify = {
 				'schedule': 2,
