@@ -51,8 +51,8 @@ function* register(next) {
 				'target': 170
 			}];
 			user.notify = {
-				'task': 2,
-				'chat': 15
+				'schedule': 2,
+				'message': 15
 			};
 			user.tasks = [{
 				'type': 'weight',
