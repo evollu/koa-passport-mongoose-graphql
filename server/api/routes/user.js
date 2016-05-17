@@ -83,14 +83,16 @@ export default (router) => {
 				'email': 'dummy@adf.com',
 				'type': 'Physician',
 				'photo': 'http://ia.media-imdb.com/images/M/MV5BMTM0Mjc2NzI5OF5BMl5BanBnXkFtZTYwMDk4NzE3._V1_SX640_SY720_.jpg',
-				'canChat': true
+				'canChat': true,
+				readOnly: true
 			}, {
 				'name': 'Allison Cameron',
 				'email': 'dummy@adf.com',
 				'phone': '1234567890',
 				'type': 'CareManager',
 				'photo': 'http://vignette1.wikia.nocookie.net/house/images/5/5c/AllisonCameron.png/revision/latest?cb=20070812160453',
-				'canChat': true
+				'canChat': true,
+				readOnly: true
 			}, {
 				'name': 'Remy Hadley',
 				'email': 'dummy@adf.com',

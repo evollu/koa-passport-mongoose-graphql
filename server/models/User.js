@@ -23,7 +23,8 @@ const TeamSchema = new mongoose.Schema({
 	},
 	canChat: {
 		type: Boolean
-	}
+	},
+	readOnly: {type: Boolean}
 });
 
 const MeasureSchema = new mongoose.Schema({
