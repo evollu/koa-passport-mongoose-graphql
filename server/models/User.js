@@ -89,8 +89,8 @@ const UserSchema = new mongoose.Schema({
 	}],
 	tasks: [TaskSchema],
 	notify: {
-		chat: Number,
-		task: Number
+		schedule: Number,
+		message: Number
 	}
 }, {
 	timestamps: {
