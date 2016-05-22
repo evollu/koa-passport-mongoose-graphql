@@ -1,10 +1,17 @@
 import passport from 'koa-passport';
 import compose from 'koa-compose';
-import User from '../models/User';
 import jwt from 'jsonwebtoken';
 import {
 	auth as config
 } from './config';
+
+import {
+    knex
+} from '../db/pg';
+
+import humps from 'humps';
+
+import {User} from '../models';
 
 // Strategies
 import jwtStrategy from './strategies/jwt';
@@ -14,7 +21,7 @@ passport.use('jwt', jwtStrategy);
 passport.use('email', emailStrategy);
 
 passport.serializeUser((user, done) => {
-	done(null, user._id);
+	done(null, user.id);
 });
 
 passport.deserializeUser((id, done) => {
@@ -55,10 +62,14 @@ export function generateToken() {
 				id: user
 			}, config.secret);
 			const token = `JWT ${_token}`;
-
+			
 			const currentUser = yield User.findOne({
-				_id: user
+				where: {
+					id: user
+				}
 			});
+
+			console.log(currentUser);
 
 			this.status = 200;
 			this.body = {

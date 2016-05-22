@@ -1,6 +1,6 @@
 import app from './server';
 import co from 'co';
-import { connectDatabase, connectRedis } from './server/db';
+import { connectDatabase, connectRedis, connectPG } from './server/db';
 
 const port = process.env.PORT || 4000;
 
@@ -18,6 +18,13 @@ co(function*() {
 	} catch (e) {
 		console.error(e);
 	}
+
+	try{
+		connectPG();
+	} catch (e){
+		console.error(e);
+	}
+
 
 	yield app.listen(port);
 	console.log(`Server started on port ${port}`);
