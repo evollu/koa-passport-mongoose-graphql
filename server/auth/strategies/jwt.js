@@ -1,5 +1,3 @@
-import User from '../../models/User';
-import co from 'co';
 import {
 	Strategy as JWTStrategy,
 	ExtractJwt
@@ -8,16 +6,22 @@ import {
 	auth
 } from '../config';
 
+import {User} from '../../models';
+
 const opts = {
 	jwtFromRequest: ExtractJwt.fromAuthHeader(),
 	secretOrKey: auth.secret,
 };
 
-export default new JWTStrategy(opts, co.wrap(function*(jwt_payload, done) {
-	const user = yield User.findById(jwt_payload.id);
+export default new JWTStrategy(opts, async(jwt_payload, done) =>{
+	const user = await User.findOne({
+		where: {
+			id: jwt_payload.id
+		}
+	});
 	if (user) {
 		done(null, user);
 	} else {
 		done(null, false);
 	}
-}));
+});
