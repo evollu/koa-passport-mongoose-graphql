@@ -10,49 +10,11 @@ import api from './api';
 const app = new Koa();
 app.keys = ['my-secret-key'];
 
-import graffiti from '@risingstack/graffiti';
 
-import UserSchema from './graphql/mutation';
-
-// import { getSchema } from '@risingstack/graffiti-mongoose';
-// import Models, {validateHook, authHook} from './models';
-
-//
-// const preMutation = (next, args, context, info) => {
-// 	let invalid = validateHook(info.fieldName, args);
-// 	if (invalid) {
-// 		throw invalid;
-// 	}
-// 	//let newArgs = authHook(info.fieldName, args);
-// 	next(args);
-// };
-//
-// const schema = getSchema(Models, {
-// 	hooks: {
-// 		mutation: {
-// 			pre: preMutation
-// 		}
-// 	}
-// });
-
-const graphiql = true;
-
-app.use(function*(next) {
-	try {
-		yield next;
-	} catch (err) {
-		this.status = 500;
-		this.body = err.message;
-	}
-});
 app.use(logger());
 app.use(cors());
 app.use(bodyParser());
 app.use(auth());
-app.use(graffiti.koa({
-	schema: UserSchema,
-	graphiql,
-}));
 app.use(etag());
 app.use(api());
 app.use(function*() {
